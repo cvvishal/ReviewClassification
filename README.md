@@ -1,2 +1,2 @@
 # ReviewClassification
-CNN for text classification using tensorflow
+RNN,CNN for text classification using tensorflow
