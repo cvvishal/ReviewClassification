@@ -12,12 +12,9 @@ from gensim.models.doc2vec import LabeledSentence, Doc2Vec
 import random
 from sklearn import metrics
 df = pd.read_csv("ldata.csv")
-#temporary
-df = df.drop(range(97,198),axis=0)
 
 headers = list(df.columns.values)
 
-#temporary
 df = df[df.Praise.notnull()]
 df = df[df.Problem.notnull()]
 df = df[df.Mitigation.notnull()]
@@ -29,7 +26,7 @@ df = df[df.Localization.notnull()]
 df_x = df.loc[:, ['Comments']]
 
 headers.remove('Comments')
-headers = ["Solution"]
+headers = ["Localization"]
 
 df_y = df.loc[:, headers]
 df_y.head()
@@ -61,7 +58,7 @@ inputY = y_train.as_matrix()
 outputX = np.array(x_test)
 outputY = y_test.as_matrix()
 numFeatures = inputX.shape[1]
-numEpochs  = 100
+numEpochs  = 1000
 n_classes = 2
 
 x = tf.placeholder('float', [None, numFeatures])
@@ -88,17 +85,12 @@ def convolutional_neural_network(x):
                'b_fc':tf.Variable(tf.random_normal([1024])),
                'out':tf.Variable(tf.random_normal([n_classes]))}
 
-    print(x.get_shape())
     x = tf.reshape(x, shape=[-1, 1, numFeatures, 1])
-    print(x.get_shape())
-    print(weights['W_conv1'].get_shape())
-    conv1 = tf.nn.relu(conv2d(x, weights['W_conv1']) + biases['b_conv1'])
+    conv1 = tf.nn.sigmoid(conv2d(x, weights['W_conv1']) + biases['b_conv1'])
     conv1 = maxpool2d(conv1)
     conv2 = tf.nn.sigmoid(conv2d(conv1, weights['W_conv2']) + biases['b_conv2'])
-    print(conv2.get_shape())
     conv3 = tf.nn.sigmoid(conv2d(conv2, weights['W_conv3']) + biases['b_conv3'])
     fc = tf.reshape(conv3, [-1, weights['W_fc'].get_shape().as_list()[0]])
-    print(fc.get_shape())
     fc = tf.nn.sigmoid(tf.matmul(fc, weights['W_fc'])+biases['b_fc'])
     fc = tf.nn.dropout(fc, keep_rate)
     output = tf.matmul(fc, weights['out'])+biases['out']
@@ -116,7 +108,7 @@ def train_neural_network(x):
     for i in range(numEpochs):
         print i
         sess.run(optimizer, feed_dict={x: inputX, y: inputY}) 
-        acc,c = sess.run([accuracy, cost], feed_dict={x: inputX,y: inputY})
+        acc,c,pre = sess.run([accuracy, cost,correct_pred], feed_dict={x: inputX,y: inputY})
         if i % display_step == 0:
             print('Accuracy:',acc)
     print("Testing Accuracy:",sess.run(accuracy, feed_dict={x: outputX,y: outputY,}))
