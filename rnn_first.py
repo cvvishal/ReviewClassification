@@ -61,13 +61,13 @@ inputY = y_train.as_matrix()
 outputX = np.array(x_test)
 outputY = y_test.as_matrix()
 numFeatures = inputX.shape[1]
-numEpochs  = 100
+numEpochs  = 1000
 chunk_size=numFeatures/10
 n_chunks=numFeatures/chunk_size
 n_classes = 2
 rnn_size = numFeatures
 
-x = tf.placeholder('float', [None, 900,1])
+x = tf.placeholder('float', [None, 1001,1])
 y = tf.placeholder('float')
 
 def recurrent_neural_network_model(x):
@@ -92,15 +92,14 @@ def train_neural_network(x):
     display_step = 50
     for i in range(numEpochs):
         print i
-        _, c = sess.run([optimizer, cost], feed_dict={x: inputX.reshape(-1,900,1), y: inputY})
-        print(prediction.shape)
+        _, c = sess.run([optimizer, cost], feed_dict={x: inputX.reshape(-1,1001,1), y: inputY})
         correct = tf.equal(tf.argmax(prediction, 1), tf.argmax(y, 1))
         accuracy = tf.reduce_mean(tf.cast(correct, 'float'))
-        acc,c = sess.run([accuracy, cost], feed_dict={x: inputX.reshape(-1,900,1),y: inputY})
-
-        print('Accuracy:',acc)
-    print("Testing Accuracy:", \
-        sess.run(accuracy, feed_dict={x: inputX.reshape(-1,900,1),
+        acc,c = sess.run([accuracy, cost], feed_dict={x: inputX.reshape(-1,1001,1),y: inputY})
+        if i % display_step == 0:
+            print('Accuracy:',acc)
+    print("Accuracy:", \
+        sess.run(accuracy, feed_dict={x: inputX.reshape(-1,1001,1),
                                       y: inputY,
                                       }))
 print(inputX.shape)
